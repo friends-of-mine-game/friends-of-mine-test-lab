@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
+  "name": "friends-of-mine-test-lab-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-19",
+  "vars": {
+    "GITHUB_OWNER": "friends-of-mine-game",
+    "GITHUB_REPO": "friends-of-mine-test-results",
+    "GITHUB_BRANCH": "main"
+  }
+}
