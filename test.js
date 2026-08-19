@@ -1,1 +1,6 @@
-window.FOM_TEST={id:'smoke-test',version:'1.0',title:'Friends of Mine · prueba técnica',intro:'Prueba de extremo a extremo para validar la web y el guardado de respuestas antes de publicar el test de socios.',questions:[{id:'T01',section:'Validación técnica',text:'¿Puedes leer esta pregunta correctamente desde el móvil?',why:false,type:'single',options:[{id:'A',text:'Sí'},{id:'B',text:'No'}]},{id:'T02',section:'Validación técnica',text:'Escribe una frase cualquiera para comprobar el guardado de texto libre.',why:false,type:'open',options:[]},{id:'T03',section:'Validación técnica',text:'Selecciona hasta dos opciones para comprobar la multiselección.',why:true,type:'multi',max:2,options:[{id:'A',text:'Opción A'},{id:'B',text:'Opción B'},{id:'C',text:'Opción C'}]}]};
+(() => {
+  const requested = new URLSearchParams(location.search).get('test') || 'socios-v1';
+  const allowed = new Set(['socios-v1', 'smoke-test']);
+  const id = allowed.has(requested) ? requested : 'socios-v1';
+  document.write(`<script src="tests/${id}.js"><\/script>`);
+})();
