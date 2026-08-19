@@ -6,7 +6,7 @@ Laboratorio público y ligero para ejecutar pruebas humanas del proyecto Friends
 
 `idea → test versionado → enlace → respuestas estructuradas → análisis → decisión`
 
-Este repositorio **no contiene el GDD ni código del producto**. Solo contiene instrumentación y cuestionarios que se decida hacer públicos.
+Este repositorio no contiene el GDD ni código del producto. Solo contiene instrumentación y cuestionarios que se decida hacer públicos.
 
 ## Web
 
@@ -16,48 +16,31 @@ GitHub Pages publica la interfaz en:
 
 El navegador mantiene un borrador en `localStorage` para que cerrar o recargar no borre el test.
 
-## Guardado automático de respuestas
+## Guardado automático
 
-La web está preparada para enviar el JSON final a un Cloudflare Worker. El Worker guarda cada respuesta como un archivo distinto en un repositorio GitHub configurado mediante variables, sin exponer el token de GitHub al navegador.
+Para evitar backend propio, Workers, tokens GitHub y repos adicionales, las respuestas se envían a SplitForms al terminar el test.
 
 Flujo:
 
-`GitHub Pages → POST al Worker → GitHub Contents API → repo privado de resultados`
+`GitHub Pages → SplitForms → dashboard privado + email`
 
-Por privacidad, **no se recomienda guardar respuestas de personas en este repositorio público**. El destino previsto es un repositorio privado independiente llamado `friends-of-mine-test-results`.
+La respuesta completa se manda en el campo `response_json`, junto con `test_id`, versión, participante y timestamps. La descarga local del JSON sigue disponible como respaldo si el servicio falla.
 
-Ejemplo de archivo generado:
+SplitForms usa una access key pública diseñada para clientes web. No da acceso de lectura a las respuestas ni permite administrar la cuenta. Se recomienda restringirla en SplitForms al dominio `friends-of-mine-game.github.io`.
 
-`results/test-socios-v1/2026-08-19T16-30-00-alexandre-a1b2c3d4.json`
+## Activación única
 
-Si el endpoint no está configurado o falla, la descarga manual del JSON sigue disponible como respaldo.
+1. Crear una cuenta gratuita en SplitForms.
+2. Copiar la access key del formulario.
+3. Configurar `Allowed Domains` con `friends-of-mine-game.github.io`.
+4. Escribir la key en `config.js`:
 
-## Worker
+```js
+window.FOM_CONFIG = {
+  splitFormsAccessKey: 'sf_live_...'
+};
+```
 
-Código: `worker/src/index.js`
+Después GitHub Pages se redespliega automáticamente y el botón final pasa a enviar las respuestas sin pasos manuales.
 
-Configuración: `worker/wrangler.jsonc`
-
-Variables no secretas ya previstas:
-
-- `GITHUB_OWNER=friends-of-mine-game`
-- `GITHUB_REPO=friends-of-mine-test-results`
-- `GITHUB_BRANCH=main`
-
-Secret requerido en Cloudflare:
-
-- `GITHUB_TOKEN`: fine-grained personal access token con acceso únicamente al repositorio privado de resultados y permiso `Contents: Read and write`.
-
-El Worker acepta POST solo desde el origen de GitHub Pages, limita el tamaño del payload, valida la estructura básica y genera un nombre de archivo único.
-
-## Activación
-
-1. Crear en la organización un repo **privado** vacío `friends-of-mine-test-results`.
-2. Crear un fine-grained PAT de GitHub limitado a ese repo con `Contents: Read and write`.
-3. En Cloudflare Workers & Pages, importar este repositorio como Worker con root directory `worker`.
-4. Añadir `GITHUB_TOKEN` como **Secret** de runtime.
-5. Desplegar y copiar la URL `https://...workers.dev`.
-6. Escribir esa URL en `config.js` como `window.FOM_RESPONSE_API_URL`.
-7. Probar un smoke test y comprobar que aparece un JSON en el repo privado.
-
-No incluir tokens ni secretos en `config.js`, `wrangler.jsonc`, GitHub Pages ni ningún archivo versionado.
+El plan gratuito de SplitForms ofrece 500 envíos al mes, suficiente para el uso previsto del Test Lab.
