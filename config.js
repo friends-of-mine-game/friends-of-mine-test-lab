@@ -1,1 +1,3 @@
-window.FOM_RESPONSE_API_URL = '';
+window.FOM_CONFIG = {
+  splitFormsAccessKey: ''
+};
