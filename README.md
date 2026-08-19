@@ -1,46 +1,39 @@
 # Friends of Mine · Test Lab
 
-Laboratorio público y ligero para ejecutar pruebas humanas del proyecto Friends of Mine desde móvil.
+Laboratorio público para pruebas humanas de Friends of Mine desde móvil.
 
-## Objetivo
+## Flujo
 
-`idea → test versionado → enlace → respuestas estructuradas → análisis → decisión`
+`idea → test versionado → URL específica → respuesta móvil → SplitForms → análisis → decisión`
 
-Este repositorio no contiene el GDD ni código del producto. Solo contiene instrumentación y cuestionarios que se decida hacer públicos.
+El repo no contiene GDD ni código del producto. Solo la interfaz y cuestionarios que decidimos publicar.
 
-## Web
+## URLs
 
-GitHub Pages publica la interfaz en:
+La web base es `https://friends-of-mine-game.github.io/friends-of-mine-test-lab/` y abre por defecto el test de socios.
 
-`https://friends-of-mine-game.github.io/friends-of-mine-test-lab/`
+Cada test tiene URL estable mediante `?test=`:
 
-El navegador mantiene un borrador en `localStorage` para que cerrar o recargar no borre el test.
+- socios: `https://friends-of-mine-game.github.io/friends-of-mine-test-lab/?test=socios-v1`
+- smoke técnico: `https://friends-of-mine-game.github.io/friends-of-mine-test-lab/?test=smoke-test`
 
-## Guardado automático
+Para añadir otro test se crea `tests/<id>.js` y se autoriza el id en `test.js`. El motor no se duplica.
 
-Para evitar backend propio, Workers, tokens GitHub y repos adicionales, las respuestas se envían a SplitForms al terminar el test.
+## Respuestas
 
-Flujo:
+Al terminar, la web envía automáticamente la respuesta a SplitForms. SplitForms es únicamente el buzón/receptor: evita mantener un backend propio y almacena cada submission en un dashboard privado asociado a la cuenta de Alexandre.
 
-`GitHub Pages → SplitForms → dashboard privado + email`
+Cada submission incluye `test_id`, versión, participante, timestamps y `response_json` con todas las respuestas, confianza y justificaciones. Desde la cuenta de SplitForms Alexandre puede consultar y descargar/exportar las respuestas para analizarlas. Los participantes no necesitan cuenta ni ven SplitForms.
 
-La respuesta completa se manda en el campo `response_json`, junto con `test_id`, versión, participante y timestamps. La descarga local del JSON sigue disponible como respaldo si el servicio falla.
+El navegador mantiene además el progreso en `localStorage`. La descarga JSON manual solo aparece si falla el envío automático, como recuperación.
 
-SplitForms usa una access key pública diseñada para clientes web. No da acceso de lectura a las respuestas ni permite administrar la cuenta. Se recomienda restringirla en SplitForms al dominio `friends-of-mine-game.github.io`.
+## Separación de responsabilidades
 
-## Activación única
+- GitHub: versiona aplicación, cuestionarios y cambios.
+- GitHub Pages: publica la web gratis.
+- SplitForms: recibe y almacena submissions.
+- Repo privado principal: conserva GDD, decisiones y conclusiones de los análisis; no recibe un commit por cada participante.
 
-1. Crear una cuenta gratuita en SplitForms.
-2. Copiar la access key del formulario.
-3. Configurar `Allowed Domains` con `friends-of-mine-game.github.io`.
-4. Escribir la key en `config.js`:
+## Test de socios
 
-```js
-window.FOM_CONFIG = {
-  splitFormsAccessKey: 'sf_live_...'
-};
-```
-
-Después GitHub Pages se redespliega automáticamente y el botón final pasa a enviar las respuestas sin pasos manuales.
-
-El plan gratuito de SplitForms ofrece 500 envíos al mes, suficiente para el uso previsto del Test Lab.
+`?test=socios-v1` contiene las 55 preguntas del test exhaustivo validado en el repo principal. Alexandre y Anxo deben responderlo por separado. Sus respuestas son hipótesis de diseño, no evidencia externa. Después se ejecuta el run de análisis y se construye un test externo distinto, más corto (objetivo ≤15 min).
